@@ -1,18 +1,36 @@
-const app = require('express')();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
-const port = process.env.PORT || 3000;
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+const channels = {};
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/example.html');
+  res.sendFile(process.cwd() + '/example.html');
 });
 
 io.on('connection', (socket) => {
-  socket.on('chat message', msg => {
-    io.emit('chat message', msg);
+  console.log('new connection: ' + socket.id);
+  socket.on('chat_message', data => {
+    console.log(data);
+    const channel = channels[socket.id];
+    console.log(channel);
+    console.log('new msg', data.message);
+    console.log('USER : ', data.user);
+    socket.to(channel).emit('new_message',data.message);
   });
-});
 
-http.listen(port, () => {
-  console.log(`Socket.IO server running at http://localhost:${port}/`);
+  socket.on('join_channel', (channel) => {
+    channels[socket.id] = channel;
+    console.log('channels',channels);
+    console.log('join channel', channel);
+    socket.join(channel);
+  });
+
+});
+//https://socket.io/get-started/chat#getting-this-example
+
+server.listen(3000, () => {
+  console.log('listening on *:3000');
 });
