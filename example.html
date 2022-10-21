@@ -90,7 +90,7 @@
       const input = document.getElementById('input');
     socket.emit('chat_message',
       {
-        message: user.value + ' : ' + input.value,
+        message: user.value + ':' + input.value,
         channel: document.getElementById('input_channel').value,
         user: document.getElementById('user_name').value
       });
